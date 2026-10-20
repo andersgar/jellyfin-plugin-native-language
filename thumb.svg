@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1124"/>
+      <stop offset="1" stop-color="#1a1236"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.27" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7a4fd0" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7a4fd0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="jf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#aa5cc3"/>
+      <stop offset="1" stop-color="#00a4dc"/>
+    </linearGradient>
+    <linearGradient id="jfText" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c47be0"/>
+      <stop offset="1" stop-color="#2fbff0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="540" fill="url(#bg)"/>
+  <rect width="960" height="540" fill="url(#glow)"/>
+
+  <!-- film frame behind the bubble -->
+  <g transform="rotate(-8 250 270)" opacity="0.9">
+    <rect x="118" y="132" width="264" height="300" rx="18" fill="#141a33" stroke="#ffffff" stroke-opacity="0.16" stroke-width="3"/>
+    <g fill="#ffffff" fill-opacity="0.14">
+      <rect x="132" y="150" width="16" height="22" rx="4"/>
+      <rect x="132" y="196" width="16" height="22" rx="4"/>
+      <rect x="132" y="242" width="16" height="22" rx="4"/>
+      <rect x="132" y="288" width="16" height="22" rx="4"/>
+      <rect x="132" y="334" width="16" height="22" rx="4"/>
+      <rect x="132" y="380" width="16" height="22" rx="4"/>
+      <rect x="352" y="150" width="16" height="22" rx="4"/>
+      <rect x="352" y="196" width="16" height="22" rx="4"/>
+      <rect x="352" y="242" width="16" height="22" rx="4"/>
+      <rect x="352" y="288" width="16" height="22" rx="4"/>
+      <rect x="352" y="334" width="16" height="22" rx="4"/>
+      <rect x="352" y="380" width="16" height="22" rx="4"/>
+    </g>
+  </g>
+
+  <!-- speech bubble -->
+  <g filter="url(#shadow)">
+    <path d="M190 178 h196 a34 34 0 0 1 34 34 v118 a34 34 0 0 1 -34 34 h-118 l-58 44 l12 -44 h-32 a34 34 0 0 1 -34 -34 v-118 a34 34 0 0 1 34 -34 z" fill="url(#jf)"/>
+  </g>
+  <text x="288" y="306" text-anchor="middle" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="112" font-weight="700" fill="#ffffff" letter-spacing="-2">Aa</text>
+
+  <!-- name -->
+  <text x="492" y="246" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="78" font-weight="700" fill="#ffffff" letter-spacing="-1">Native</text>
+  <text x="492" y="326" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="78" font-weight="700" fill="url(#jfText)" letter-spacing="-1">Language</text>
+  <text x="494" y="370" font-family="Segoe UI, Inter, Helvetica, Arial, sans-serif" font-size="23" fill="#b9bdd6">Original titles, in the languages you choose</text>
+
+  <!-- language chips -->
+  <g font-family="Consolas, 'Cascadia Mono', Menlo, monospace" font-size="20" fill="#dfe3f5" text-anchor="middle">
+    <rect x="494" y="398" width="54" height="32" rx="16" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.18"/>
+    <text x="521" y="420">no</text>
+    <rect x="558" y="398" width="54" height="32" rx="16" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.18"/>
+    <text x="585" y="420">sv</text>
+    <rect x="622" y="398" width="54" height="32" rx="16" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.18"/>
+    <text x="649" y="420">de</text>
+    <rect x="686" y="398" width="54" height="32" rx="16" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.18"/>
+    <text x="713" y="420">fr</text>
+    <rect x="750" y="398" width="54" height="32" rx="16" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.18"/>
+    <text x="777" y="420">ja</text>
+  </g>
+</svg>
