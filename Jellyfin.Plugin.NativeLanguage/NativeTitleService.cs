@@ -22,6 +22,7 @@ public class NativeTitleService
     private readonly TmdbLanguageClient _tmdb;
     private readonly ILogger<NativeTitleService> _logger;
     private readonly SemaphoreSlim _runLock = new(1, 1);
+    private string? _jellyfinKey;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NativeTitleService"/> class.
@@ -137,7 +138,7 @@ public class NativeTitleService
                 item.GetProviderId(MetadataProvider.Tmdb),
                 item.GetProviderId(MetadataProvider.Tvdb),
                 item.GetProviderId(MetadataProvider.Imdb),
-                config.TmdbApiKey.Trim(),
+                ResolveApiKey(config)!,
                 cancellationToken).ConfigureAwait(false);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -195,13 +196,24 @@ public class NativeTitleService
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(config.TmdbApiKey))
+        if (ResolveApiKey(config) is null)
         {
-            _logger.LogWarning("Native Language needs a TMDb API key in its settings");
+            _logger.LogWarning("Native Language has no TMDb key: set one in its settings");
             return false;
         }
 
         return true;
+    }
+
+    private string? ResolveApiKey(Configuration.PluginConfiguration config)
+    {
+        // An own key in the plugin settings wins; otherwise use the key Jellyfin's TMDb plugin uses.
+        if (!string.IsNullOrWhiteSpace(config.TmdbApiKey))
+        {
+            return config.TmdbApiKey.Trim();
+        }
+
+        return _jellyfinKey ??= JellyfinTmdbKey.Find(_logger);
     }
 
     private static HashSet<string> ParseLanguages(string languages) =>

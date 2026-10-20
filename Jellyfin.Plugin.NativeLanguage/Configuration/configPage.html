@@ -18,9 +18,9 @@
                         </label>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="TmdbApiKey">TMDb API key</label>
-                        <input id="TmdbApiKey" name="TmdbApiKey" type="password" is="emby-input" autocomplete="off" />
-                        <div class="fieldDescription">A v3 API key or a v4 read access token, from themoviedb.org &rarr; Settings &rarr; API. Used to look up each title's original language once; results are cached.</div>
+                        <label class="inputLabel inputLabelUnfocused" for="TmdbApiKey">Own TMDb API key (optional)</label>
+                        <input id="TmdbApiKey" name="TmdbApiKey" type="password" is="emby-input" autocomplete="off" placeholder="Empty: use Jellyfin's TMDb key" />
+                        <div class="fieldDescription">Leave empty to use the same TMDb access as Jellyfin (the key from the TMDb plugin's settings, or Jellyfin's built-in key). Enter your own v3 API key or v4 read access token (themoviedb.org &rarr; Settings &rarr; API) to use that instead. Each title's original language is looked up once and cached.</div>
                     </div>
                     <div class="inputContainer">
                         <label class="inputLabel inputLabelUnfocused" for="Languages">Original languages</label>
