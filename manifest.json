@@ -1,0 +1,11 @@
+[
+  {
+    "guid": "9a5c2017-843a-4c20-a6be-577aef403634",
+    "name": "Native Language",
+    "description": "Original titles for movies and series in your chosen original languages.",
+    "overview": "Movies and series whose original language is in a list you choose (for example Norwegian) get their original title, locked so metadata refreshes keep it. Everything else keeps the title from your library's metadata language. Original languages are looked up on TMDb.",
+    "owner": "andersgar",
+    "category": "Metadata",
+    "versions": []
+  }
+]

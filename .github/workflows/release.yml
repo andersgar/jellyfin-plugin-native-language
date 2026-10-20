@@ -1,0 +1,72 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)release, e.g. v1.0.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: version
+        id: v
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          V="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "assembly=$V.0" >> "$GITHUB_OUTPUT"
+          git checkout "$TAG" -- Jellyfin.Plugin.NativeLanguage
+
+      - name: build
+        run: >
+          dotnet publish Jellyfin.Plugin.NativeLanguage/Jellyfin.Plugin.NativeLanguage.csproj -c Release -o out
+          -p:Version=${{ steps.v.outputs.version }}
+          -p:AssemblyVersion=${{ steps.v.outputs.assembly }}
+          -p:FileVersion=${{ steps.v.outputs.assembly }}
+
+      - name: package
+        id: pkg
+        run: |
+          ZIP="native-language_${{ steps.v.outputs.assembly }}.zip"
+          mkdir pkg
+          cp out/Jellyfin.Plugin.NativeLanguage.dll pkg/
+          (cd pkg && zip -q "../$ZIP" ./*)
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+          echo "md5=$(md5sum "$ZIP" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.v.outputs.tag }}
+          files: ${{ steps.pkg.outputs.zip }}
+
+      - name: update manifest
+        run: |
+          git checkout -- Jellyfin.Plugin.NativeLanguage
+          python3 .github/scripts/update_manifest.py \
+            --version "${{ steps.v.outputs.assembly }}" \
+            --checksum "${{ steps.pkg.outputs.md5 }}" \
+            --url "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}/${{ steps.pkg.outputs.zip }}" \
+            --changelog "See https://github.com/${{ github.repository }}/releases/tag/${{ steps.v.outputs.tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json
+          git commit -m "manifest ${{ steps.v.outputs.tag }}" || echo "manifest unchanged"
+          git push origin HEAD:main
