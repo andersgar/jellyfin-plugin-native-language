@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Native Language</title>
+</head>
+<body>
+    <div id="NativeLanguageConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <h2>Native Language</h2>
+                <p>Movies and series whose original language is in the list below get their original title, and the title is locked so metadata refreshes keep it. Everything else keeps the title from your library's metadata language.</p>
+                <form id="NativeLanguageConfigForm">
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="Enabled" name="Enabled" type="checkbox" is="emby-checkbox" />
+                            <span>Enabled</span>
+                        </label>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="TmdbApiKey">TMDb API key</label>
+                        <input id="TmdbApiKey" name="TmdbApiKey" type="password" is="emby-input" autocomplete="off" />
+                        <div class="fieldDescription">A v3 API key or a v4 read access token, from themoviedb.org &rarr; Settings &rarr; API. Used to look up each title's original language once; results are cached.</div>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="Languages">Original languages</label>
+                        <input id="Languages" name="Languages" type="text" is="emby-input" />
+                        <div class="fieldDescription">Comma-separated ISO 639-1 codes, e.g. <code>no,nb,nn</code> for Norwegian or <code>sv</code> for Swedish.</div>
+                    </div>
+                    <div class="checkboxContainer">
+                        <label class="emby-checkbox-label">
+                            <input id="IncludeMovies" name="IncludeMovies" type="checkbox" is="emby-checkbox" />
+                            <span>Movies</span>
+                        </label>
+                    </div>
+                    <div class="checkboxContainer">
+                        <label class="emby-checkbox-label">
+                            <input id="IncludeSeries" name="IncludeSeries" type="checkbox" is="emby-checkbox" />
+                            <span>Series</span>
+                        </label>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="LockName" name="LockName" type="checkbox" is="emby-checkbox" />
+                            <span>Lock the title</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">Recommended. Without the lock, the next metadata refresh can change the title back.</div>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="DryRun" name="DryRun" type="checkbox" is="emby-checkbox" />
+                            <span>Dry run</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">Only write what would change to the log, without changing anything.</div>
+                    </div>
+                    <p>Runs automatically when new items get metadata and after every library scan. To run it now: Dashboard &rarr; Scheduled Tasks &rarr; <em>Apply native-language titles</em>.</p>
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var NativeLanguageConfig = {
+                pluginUniqueId: '9a5c2017-843a-4c20-a6be-577aef403634',
+                checkboxes: ['Enabled', 'IncludeMovies', 'IncludeSeries', 'LockName', 'DryRun'],
+                texts: ['TmdbApiKey', 'Languages']
+            };
+
+            document.querySelector('#NativeLanguageConfigPage').addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(NativeLanguageConfig.pluginUniqueId).then(function (config) {
+                    NativeLanguageConfig.checkboxes.forEach(function (id) {
+                        document.querySelector('#' + id).checked = !!config[id];
+                    });
+                    NativeLanguageConfig.texts.forEach(function (id) {
+                        document.querySelector('#' + id).value = config[id] || '';
+                    });
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+            document.querySelector('#NativeLanguageConfigForm').addEventListener('submit', function (e) {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(NativeLanguageConfig.pluginUniqueId).then(function (config) {
+                    NativeLanguageConfig.checkboxes.forEach(function (id) {
+                        config[id] = document.querySelector('#' + id).checked;
+                    });
+                    NativeLanguageConfig.texts.forEach(function (id) {
+                        config[id] = document.querySelector('#' + id).value.trim();
+                    });
+                    ApiClient.updatePluginConfiguration(NativeLanguageConfig.pluginUniqueId, config).then(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+                    });
+                });
+                e.preventDefault();
+                return false;
+            });
+        </script>
+    </div>
+</body>
+</html>
