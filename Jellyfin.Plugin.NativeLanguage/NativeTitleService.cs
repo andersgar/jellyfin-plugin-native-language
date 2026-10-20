@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
+using Jellyfin.Plugin.NativeLanguage.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
@@ -147,7 +148,16 @@ public class NativeTitleService
             return false;
         }
 
-        if (info is null || !ParseLanguages(config.Languages).Contains(info.Language))
+        if (info is null || string.IsNullOrEmpty(info.Language))
+        {
+            return false;
+        }
+
+        var language = NormalizeLanguage(info.Language);
+        var listed = ParseLanguages(config.Languages).Contains(language);
+        var applies = config.Mode == LanguageMode.OnlyListed ? listed : !listed;
+
+        if (!applies)
         {
             return false;
         }
@@ -189,7 +199,7 @@ public class NativeTitleService
         return true;
     }
 
-    private bool IsUsable(Configuration.PluginConfiguration config)
+    private bool IsUsable(PluginConfiguration config)
     {
         if (!config.Enabled)
         {
@@ -205,7 +215,7 @@ public class NativeTitleService
         return true;
     }
 
-    private string? ResolveApiKey(Configuration.PluginConfiguration config)
+    private string? ResolveApiKey(PluginConfiguration config)
     {
         // An own key in the plugin settings wins; otherwise use the key Jellyfin's TMDb plugin uses.
         if (!string.IsNullOrWhiteSpace(config.TmdbApiKey))
@@ -219,6 +229,13 @@ public class NativeTitleService
     private static HashSet<string> ParseLanguages(string languages) =>
         languages
             .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(l => l.ToLowerInvariant())
+            .Select(NormalizeLanguage)
             .ToHashSet(StringComparer.Ordinal);
+
+    // "en-US" -> "en"; Norwegian Bokmål and Nynorsk count as Norwegian, as TMDb mostly uses "no".
+    private static string NormalizeLanguage(string? language)
+    {
+        var code = (language ?? string.Empty).Trim().Split('-', '_')[0].ToLowerInvariant();
+        return code is "nb" or "nn" ? "no" : code;
+    }
 }

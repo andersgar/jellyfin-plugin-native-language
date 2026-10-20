@@ -9,7 +9,7 @@
         <div data-role="content">
             <div class="content-primary">
                 <h2>Native Language</h2>
-                <p>Movies and series whose original language is in the list below get their original title, and the title is locked so metadata refreshes keep it. Everything else keeps the title from your library's metadata language.</p>
+                <p>Movies and series in the original languages you choose below get their original title, and the title is locked so metadata refreshes keep it. Everything else keeps the title from your library's metadata language.</p>
                 <form id="NativeLanguageConfigForm">
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
@@ -22,10 +22,17 @@
                         <input id="TmdbApiKey" name="TmdbApiKey" type="password" is="emby-input" autocomplete="off" placeholder="Empty: use Jellyfin's TMDb key" />
                         <div class="fieldDescription">Leave empty to use the same TMDb access as Jellyfin (the key from the TMDb plugin's settings, or Jellyfin's built-in key). Enter your own v3 API key or v4 read access token (themoviedb.org &rarr; Settings &rarr; API) to use that instead. Each title's original language is looked up once and cached.</div>
                     </div>
+                    <div class="selectContainer">
+                        <label class="selectLabel" for="Mode">Keep the original title for</label>
+                        <select id="Mode" name="Mode" is="emby-select">
+                            <option value="OnlyListed">Only these original languages</option>
+                            <option value="AllExceptListed">All original languages except these</option>
+                        </select>
+                    </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="Languages">Original languages</label>
-                        <input id="Languages" name="Languages" type="text" is="emby-input" />
-                        <div class="fieldDescription">Comma-separated ISO 639-1 codes, e.g. <code>no,nb,nn</code> for Norwegian or <code>sv</code> for Swedish.</div>
+                        <label class="inputLabel inputLabelUnfocused" for="Languages">Languages</label>
+                        <input id="Languages" name="Languages" type="text" is="emby-input" placeholder="e.g. sv" />
+                        <div class="fieldDescription">Comma-separated ISO 639-1 codes, e.g. <code>sv</code> (Swedish) or <code>no</code> (Norwegian; <code>nb</code> and <code>nn</code> count as Norwegian too). With <em>All except</em>, try <code>ja,ko,zh,th,ar,he,ru</code> to keep titles in other scripts translated.</div>
                     </div>
                     <div class="checkboxContainer">
                         <label class="emby-checkbox-label">
@@ -66,7 +73,7 @@
             var NativeLanguageConfig = {
                 pluginUniqueId: '9a5c2017-843a-4c20-a6be-577aef403634',
                 checkboxes: ['Enabled', 'IncludeMovies', 'IncludeSeries', 'LockName', 'DryRun'],
-                texts: ['TmdbApiKey', 'Languages']
+                texts: ['TmdbApiKey', 'Languages', 'Mode']
             };
 
             document.querySelector('#NativeLanguageConfigPage').addEventListener('pageshow', function () {
@@ -78,6 +85,11 @@
                     NativeLanguageConfig.texts.forEach(function (id) {
                         document.querySelector('#' + id).value = config[id] || '';
                     });
+                    // Older versions saved no mode; the select must never be left empty.
+                    var mode = document.querySelector('#Mode');
+                    if (!mode.value) {
+                        mode.value = 'OnlyListed';
+                    }
                     Dashboard.hideLoadingMsg();
                 });
             });
