@@ -157,7 +157,8 @@ public class NativeTitleService
         var listed = ParseLanguages(config.Languages).Contains(language);
         var applies = config.Mode == LanguageMode.OnlyListed ? listed : !listed;
 
-        if (!applies)
+        // Titles already in the library's metadata language are the original title anyway: leave them unlocked.
+        if (!applies || language == NormalizeLanguage(item.GetPreferredMetadataLanguage()))
         {
             return false;
         }
