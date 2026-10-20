@@ -13,7 +13,10 @@ namespace Jellyfin.Plugin.NativeLanguage;
 /// <summary>
 /// Shows the original title for movies and series whose original language is in a configured list.
 /// </summary>
-public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IHasEmbeddedImage
+public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
+#if EMBEDDED_IMAGE
+    , IHasEmbeddedImage
+#endif
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -41,8 +44,10 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IHasEmbedde
     public override string Description =>
         "Uses the original title for movies and series in chosen original languages, and locks it.";
 
+#if EMBEDDED_IMAGE
     /// <inheritdoc />
     public string ImageResourceName => GetType().Namespace + ".thumb.png";
+#endif
 
     /// <inheritdoc />
     public IEnumerable<PluginPageInfo> GetPages()

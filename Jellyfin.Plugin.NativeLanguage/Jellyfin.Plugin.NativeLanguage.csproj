@@ -1,20 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Build for a given Jellyfin release with -p:JellyfinVersion=... -p:JellyfinTfm=... (defaults: Jellyfin 12.1). -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <JellyfinVersion Condition="'$(JellyfinVersion)' == ''">12.1.0</JellyfinVersion>
+    <JellyfinTfm Condition="'$(JellyfinTfm)' == ''">net10.0</JellyfinTfm>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFramework>$(JellyfinTfm)</TargetFramework>
     <RootNamespace>Jellyfin.Plugin.NativeLanguage</RootNamespace>
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.2.0</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
+  <!-- Plugins can only embed their own image from Jellyfin 12 on. -->
+  <PropertyGroup Condition="!$(JellyfinVersion.StartsWith('10.'))">
+    <DefineConstants>$(DefineConstants);EMBEDDED_IMAGE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Controller" Version="12.1.0" ExcludeAssets="runtime" />
-    <PackageReference Include="Jellyfin.Model" Version="12.1.0" ExcludeAssets="runtime" />
+    <PackageReference Include="Jellyfin.Controller" Version="$(JellyfinVersion)" ExcludeAssets="runtime" />
+    <PackageReference Include="Jellyfin.Model" Version="$(JellyfinVersion)" ExcludeAssets="runtime" />
   </ItemGroup>
 
   <ItemGroup>

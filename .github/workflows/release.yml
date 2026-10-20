@@ -6,20 +6,37 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to (re)release, e.g. v1.0.0'
+        description: 'Existing tag to (re)release, e.g. v1.2.0'
         required: true
 
 permissions:
   contents: write
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # rev is the last part of the plugin version; Jellyfin installs the highest version
+        # whose targetAbi it supports, so newer Jellyfin builds must have the highest rev.
+        include:
+          - jellyfin: 10.10.7
+            tfm: net8.0
+            abi: 10.10.0.0
+            rev: 10
+          - jellyfin: 10.11.11
+            tfm: net9.0
+            abi: 10.11.0.0
+            rev: 11
+          - jellyfin: 12.1.0
+            tfm: net10.0
+            abi: 12.1.0.0
+            rev: 121
+    name: build (Jellyfin ${{ matrix.jellyfin }})
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
-          fetch-depth: 0
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - uses: actions/setup-dotnet@v4
         with:
@@ -29,44 +46,65 @@ jobs:
         id: v
         run: |
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          V="${TAG#v}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          V="${TAG#v}.${{ matrix.rev }}"
           echo "version=$V" >> "$GITHUB_OUTPUT"
-          echo "assembly=$V.0" >> "$GITHUB_OUTPUT"
-          git checkout "$TAG" -- Jellyfin.Plugin.NativeLanguage
 
       - name: build
         run: >
           dotnet publish Jellyfin.Plugin.NativeLanguage/Jellyfin.Plugin.NativeLanguage.csproj -c Release -o out
+          -p:JellyfinVersion=${{ matrix.jellyfin }} -p:JellyfinTfm=${{ matrix.tfm }}
           -p:Version=${{ steps.v.outputs.version }}
-          -p:AssemblyVersion=${{ steps.v.outputs.assembly }}
-          -p:FileVersion=${{ steps.v.outputs.assembly }}
+          -p:AssemblyVersion=${{ steps.v.outputs.version }}
+          -p:FileVersion=${{ steps.v.outputs.version }}
 
       - name: package
-        id: pkg
         run: |
-          ZIP="native-language_${{ steps.v.outputs.assembly }}.zip"
-          mkdir pkg
+          ZIP="native-language_${{ steps.v.outputs.version }}.zip"
+          mkdir -p pkg dist
           cp out/Jellyfin.Plugin.NativeLanguage.dll pkg/
-          (cd pkg && zip -q "../$ZIP" ./*)
-          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
-          echo "md5=$(md5sum "$ZIP" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          (cd pkg && zip -q "../dist/$ZIP" ./*)
+          printf '{"version":"%s","abi":"%s","zip":"%s","md5":"%s"}\n' \
+            "${{ steps.v.outputs.version }}" "${{ matrix.abi }}" "$ZIP" "$(md5sum "dist/$ZIP" | cut -d' ' -f1)" > "dist/$ZIP.json"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.rev }}
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: tag
+        id: t
+        run: echo "tag=${{ github.event.inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
 
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.v.outputs.tag }}
-          files: ${{ steps.pkg.outputs.zip }}
+          tag_name: ${{ steps.t.outputs.tag }}
+          files: dist/*.zip
 
       - name: update manifest
         run: |
-          git checkout -- Jellyfin.Plugin.NativeLanguage
-          python3 .github/scripts/update_manifest.py \
-            --version "${{ steps.v.outputs.assembly }}" \
-            --checksum "${{ steps.pkg.outputs.md5 }}" \
-            --url "https://github.com/${{ github.repository }}/releases/download/${{ steps.v.outputs.tag }}/${{ steps.pkg.outputs.zip }}" \
-            --changelog "See https://github.com/${{ github.repository }}/releases/tag/${{ steps.v.outputs.tag }}"
+          for meta in dist/*.zip.json; do
+            python3 .github/scripts/update_manifest.py \
+              --version "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$meta")" \
+              --abi "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["abi"])' "$meta")" \
+              --checksum "$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["md5"])' "$meta")" \
+              --url "https://github.com/${{ github.repository }}/releases/download/${{ steps.t.outputs.tag }}/$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["zip"])' "$meta")" \
+              --changelog "See https://github.com/${{ github.repository }}/releases/tag/${{ steps.t.outputs.tag }}"
+          done
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add manifest.json
-          git commit -m "manifest ${{ steps.v.outputs.tag }}" || echo "manifest unchanged"
+          git commit -m "manifest ${{ steps.t.outputs.tag }}" || echo "manifest unchanged"
           git push origin HEAD:main

@@ -5,10 +5,9 @@ import datetime
 import json
 from pathlib import Path
 
-TARGET_ABI = "12.1.0.0"
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--version", required=True)
+parser.add_argument("--abi", required=True, help="targetAbi, e.g. 12.1.0.0")
 parser.add_argument("--checksum", required=True)
 parser.add_argument("--url", required=True)
 parser.add_argument("--changelog", default="")
@@ -21,12 +20,18 @@ plugin = manifest[0]
 entry = {
     "version": args.version,
     "changelog": args.changelog,
-    "targetAbi": TARGET_ABI,
+    "targetAbi": args.abi,
     "sourceUrl": args.url,
     "checksum": args.checksum,
     "timestamp": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
 }
 
-plugin["versions"] = [entry] + [v for v in plugin.get("versions", []) if v["version"] != args.version]
+
+def version_key(v):
+    return tuple(int(p) for p in v["version"].split("."))
+
+
+versions = [v for v in plugin.get("versions", []) if v["version"] != args.version] + [entry]
+plugin["versions"] = sorted(versions, key=version_key, reverse=True)
 path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-print(f"manifest: {args.version} -> {args.url}")
+print(f"manifest: {args.version} ({args.abi}) -> {args.url}")
