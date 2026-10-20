@@ -24,7 +24,7 @@ Some languages use their own script. With `ja`, `ko` or `zh` in the list, titles
 
 ## How it works
 
-- Looks up each movie's or series' original language on TMDb (once; results are cached).
+- Looks up each movie's or series' original language on TMDb (once; results are cached), with Jellyfin's own TMDb key unless you set your own.
 - If the language is on your list, sets the title to the original title and **locks** it, so metadata refreshes don't change it back. The sort title follows the new title.
 - Runs by itself when a new item gets its metadata, and after every library scan. Run it by hand from **Dashboard → Scheduled Tasks → Apply native-language titles**.
 - Episodes and seasons are not touched.
@@ -35,7 +35,7 @@ Some languages use their own script. With `ja`, `ko` or `zh` in the list, titles
    - Name: `Native Language`
    - URL: `https://raw.githubusercontent.com/andersgar/jellyfin-plugin-native-language/main/manifest.json`
 2. **Catalog → Native Language → Install**, then restart Jellyfin.
-3. **My Plugins → Native Language**: paste a TMDb API key (themoviedb.org → Settings → API; a v3 key or a v4 read access token both work) and set your language list.
+3. **Dashboard → Native Language** (in the side menu, or under My Plugins): set your language list. No TMDb key is needed: by default the plugin uses the same TMDb access as Jellyfin itself.
 
 Tip: tick **Dry run** first and run the scheduled task. The log then lists what would change, without changing anything.
 
@@ -44,7 +44,7 @@ Tip: tick **Dry run** first and run the scheduled task. The log then lists what 
 | Setting | Default | |
 |---|---|---|
 | Enabled | on | |
-| TMDb API key | – | Required |
+| Own TMDb API key | empty | Empty uses Jellyfin's TMDb key (the one in the TMDb plugin's settings, else Jellyfin's built-in key). Enter your own v3 key or v4 read access token to override it. |
 | Original languages | `no,nb,nn` | ISO 639-1 codes, comma separated |
 | Movies / Series | on / on | |
 | Lock the title | on | Without the lock a metadata refresh can revert the title |
