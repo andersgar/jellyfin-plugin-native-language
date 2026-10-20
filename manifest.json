@@ -6,6 +6,7 @@
     "overview": "Movies and series whose original language is in a list you choose (for example Norwegian) get their original title, locked so metadata refreshes keep it. Everything else keeps the title from your library's metadata language. Original languages are looked up on TMDb.",
     "owner": "andersgar",
     "category": "Metadata",
+    "imageUrl": "https://raw.githubusercontent.com/andersgar/jellyfin-plugin-native-language/main/thumb.png",
     "versions": [
       {
         "version": "1.1.0.0",
