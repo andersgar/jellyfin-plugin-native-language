@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/andersgar/jellyfin-plugin-native-language/main/thumb.png",
     "versions": [
       {
+        "version": "1.2.0.121",
+        "changelog": "See https://github.com/andersgar/jellyfin-plugin-native-language/releases/tag/v1.2.0",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/andersgar/jellyfin-plugin-native-language/releases/download/v1.2.0/native-language_1.2.0.121.zip",
+        "checksum": "e98f21f477e507ad42d1211be152fcab",
+        "timestamp": "2026-10-20T13:33:50Z"
+      },
+      {
+        "version": "1.2.0.11",
+        "changelog": "See https://github.com/andersgar/jellyfin-plugin-native-language/releases/tag/v1.2.0",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/andersgar/jellyfin-plugin-native-language/releases/download/v1.2.0/native-language_1.2.0.11.zip",
+        "checksum": "48ba81b53db62aa1361a1c8742052718",
+        "timestamp": "2026-10-20T13:33:50Z"
+      },
+      {
+        "version": "1.2.0.10",
+        "changelog": "See https://github.com/andersgar/jellyfin-plugin-native-language/releases/tag/v1.2.0",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/andersgar/jellyfin-plugin-native-language/releases/download/v1.2.0/native-language_1.2.0.10.zip",
+        "checksum": "89c50f8082674ac2bf8ed0e09ba37e4a",
+        "timestamp": "2026-10-20T13:33:50Z"
+      },
+      {
         "version": "1.1.1.0",
         "changelog": "See https://github.com/andersgar/jellyfin-plugin-native-language/releases/tag/v1.1.1",
         "targetAbi": "12.1.0.0",
